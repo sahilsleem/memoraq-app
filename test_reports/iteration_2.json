@@ -1,0 +1,27 @@
+{
+  "summary": "RE-TEST of three HIGH bugs from iteration_1 after the getDb() 2.5s timeout fix. All three HIGH bugs are now RESOLVED and the two sanity checks still pass. (1) Follow Ups tab: 'Nothing scheduled' empty state renders in ~0.5s after tapping the Follow Ups bottom tab (no infinite 'Loading…'). (2) Settings → Load Sample Data: toast 'Database unavailable in this preview. Install the app on a device to try sample data.' fires in ~0.5s. (3) Add Customer → paste transcript '12/08/23, 10:30 AM - Rahul: Hi\\n12/08/23, 10:31 AM - You: Hello' and tap 'Import pasted text' → error card 'Import failed · Database is not available in this web preview. Install Memoraq on an Android device to import real customers.' appears in ~0.5s (no hang). (4) Pro flow: tapping 'Unlock Memoraq Pro' flips to the 'You are on Memoraq Pro.' success state. (5) Privacy screen: opens from Settings and shows support email isahsileem@gmail.com. No deprecated expo-* packages, no SafeAreaView misuse, no RN red screens.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_2.json", "/app/test_reports/iteration_1.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Fix is well-targeted: the 2.5s Promise.race timeout in getDb() + sticky dbUnavailable flag means every repo call fails fast with DbUnavailableError after the first web-preview miss, and each UI screen correctly catches it (empty state for lists, graceful 'Install Memoraq…' error card for the import pipeline, toast for sample data).",
+    "Minor: the inline 'Loading…' indicator in followups.tsx now resolves within the same frame that triggers the timeout, so users won't see it on web preview — on a real device the DB opens fast enough that this is fine. No change needed.",
+    "Non-blocking: console warning 'props.pointerEvents is deprecated. Use style.pointerEvents' appears when Settings mounts — likely from a react-native-safe-area-context / Toast dependency; cosmetic only."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (not in scope)", "frontend": "100% (5/5 re-test checks passed)"},
+  "seed_data_creation": "None — Load Sample Data now correctly short-circuits on web preview with a 'Database unavailable' toast, as expected on this environment.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Preview URL: https://customer-memory-dev.preview.emergentagent.com. localStorage key 'memoraq.onboarded'='1' + reload to skip onboarding. Mobile viewport 390x844. Important: in the Customers screen there is a filter chip labelled 'Follow-ups' AND a bottom-tab labelled 'Follow Ups' — when selecting the bottom tab in Playwright use `page.get_by_text('Follow Ups', exact=True).last` or a testID; a loose 'text=Follow' selector hits the chip first (false negative). On web preview the SQLite OPFS backend is still unavailable, so all DB-backed features intentionally degrade (empty states / graceful error card / toast) — this is now the correct, product-approved behaviour, not a bug. Pro success copy is 'You are on Memoraq Pro.'",
+  "rca_of_issue": "Iteration_1 RCA was correct: expo-sqlite OPFS does not work in the Emergent web preview, so DB awaits hung forever on screens that didn't wrap them in withTimeout. The applied fix centralises the mitigation inside getDb() itself: it races SQLite.openDatabaseAsync + migrate against a 2.5s timeout and, on first failure, sets a module-level `dbUnavailable=true` so every subsequent getDb() throws DbUnavailableError synchronously. All affected screens (followups.tsx catch → setItems([]); settings.tsx onLoadSample catch → toast; add.tsx handleResult DB_UNAVAILABLE branch → 'Install Memoraq on an Android device…' card) now surface the correct UX within <1s on web preview. Verified by Playwright run above."
+}

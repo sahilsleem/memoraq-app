@@ -1,0 +1,203 @@
+{
+  "app_name": "Memoraq",
+  "personality": "2 Material You / Expressive LIGHT or DARK (Utility Variant)",
+  "personality_one_liner": "A calm, professional, and privacy-focused business utility built around expressive but structured tonal surfaces.",
+  "color": {
+    "surface": "#FAFAFA",
+    "onSurface": "#161B18",
+    "surfaceSecondary": "#F2F4F2",
+    "onSurfaceSecondary": "#161B18",
+    "surfaceTertiary": "#E9ECE9",
+    "onSurfaceTertiary": "#161B18",
+    "surfaceInverse": "#121413",
+    "onSurfaceInverse": "#FAFAFA",
+    "brand": "#365341",
+    "brandPrimary": "#365341",
+    "onBrandPrimary": "#FFFFFF",
+    "brandSecondary": "#4F7359",
+    "onBrandSecondary": "#FFFFFF",
+    "brandTertiary": "#CDE0D2",
+    "onBrandTertiary": "#1A2F22",
+    "success": "#3A664A",
+    "onSuccess": "#FFFFFF",
+    "warning": "#856404",
+    "onWarning": "#FFFFFF",
+    "error": "#8B2E2E",
+    "onError": "#FFFFFF",
+    "info": "#4A5A52",
+    "onInfo": "#FFFFFF",
+    "border": "#E1E5E2",
+    "borderStrong": "#B8C2BC",
+    "divider": "#E1E5E2",
+    "muted": "#546358",
+    "onBrand": "#FFFFFF",
+    "dark": {
+      "surface": "#121413",
+      "onSurface": "#E3E8E4",
+      "surfaceSecondary": "#1D221E",
+      "onSurfaceSecondary": "#E3E8E4",
+      "surfaceTertiary": "#2A312B",
+      "onSurfaceTertiary": "#E3E8E4",
+      "surfaceInverse": "#FAFAFA",
+      "onSurfaceInverse": "#121413",
+      "brand": "#A3C6AF",
+      "brandPrimary": "#A3C6AF",
+      "onBrandPrimary": "#0F1C14",
+      "brandSecondary": "#82AA90",
+      "onBrandSecondary": "#0F1C14",
+      "brandTertiary": "#294232",
+      "onBrandTertiary": "#C5DFCD",
+      "success": "#5C9970",
+      "onSuccess": "#0F1C14",
+      "warning": "#D6A324",
+      "onWarning": "#0F1C14",
+      "error": "#D16060",
+      "onError": "#0F1C14",
+      "info": "#8B9E93",
+      "onInfo": "#0F1C14",
+      "border": "#313B34",
+      "borderStrong": "#4A5A52",
+      "divider": "#313B34",
+      "muted": "#93A197",
+      "onBrand": "#0F1C14"
+    }
+  },
+  "typography": {
+    "displayFontFamily": "Plus Jakarta Sans",
+    "textFontFamily": "Geist",
+    "scale": {
+      "sm": 12,
+      "base": 14,
+      "lg": 16,
+      "xl": 20,
+      "2xl": 24
+    }
+  },
+  "spacing": {
+    "rule": "Generous tonal spacing. Elements should group visually via spacing rather than harsh borders. Tap targets minimum 44x44pt.",
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 24,
+    "2xl": 32,
+    "3xl": 48
+  },
+  "radius_tokens": {
+    "sm": 6,
+    "md": 12,
+    "lg": 20,
+    "pill": 999
+  },
+  "shadow_tier": "0",
+  "navigation": "bottom_tabs",
+  "icon_set": "Phosphor",
+  "glassmorphism": {
+    "enabled": "true",
+    "do's": [
+      "Use on sticky Detail Screen headers when scrolling over the chat archive.",
+      "Use on the floating action button (FAB) with a brandTertiary base.",
+      "Use over the premium Pro Upgrade hero background."
+    ],
+    "dont's": [
+      "Do not use on individual list rows or basic input forms.",
+      "Do not over-blur; ensure >70% opacity tint for underlying layers."
+    ]
+  },
+  "platform_libraries": {
+    "glass": {
+      "ios": "expo-glass-effect",
+      "android": "expo-blur",
+      "low_end_android_fallback": "solid surfaceSecondary"
+    },
+    "image": "expo-image",
+    "blur": "expo-blur",
+    "bottom_sheet": "@gorhom/bottom-sheet",
+    "animation": "react-native-reanimated",
+    "gesture": "react-native-gesture-handler"
+  },
+  "screens": [
+    {
+      "name": "Onboarding",
+      "purpose": "Establish trust and explain the core value: protecting customer history and instantly recalling context.",
+      "states": {
+        "loading": "Centered spinner",
+        "empty": "N/A",
+        "error": "N/A"
+      },
+      "layout": "Full-bleed imagery at the top (with absolute top-to-bottom three-stop linear gradient scrim to ensure text readability). Content restricted to the bottom 40% of the screen. Display title (weight 500) and muted subtitle. A sticky primary CTA ('Get Started') anchored at the safe-area bottom."
+    },
+    {
+      "name": "Customer List (Home)",
+      "purpose": "Primary command center to quickly find, filter, and act on customer chats.",
+      "states": {
+        "loading": "Skeleton rows of customer cards",
+        "empty": "Illustration of calm abstract shapes + 'No customers yet. Share a chat from WhatsApp to begin' + Primary CTA to 'Import'",
+        "error": "Readable text 'Failed to load archive' + Retry button"
+      },
+      "layout": "Header with 'Customers' and a Search input. Immediately below, a horizontal scrollable row of filter chips (All, Follow-ups, Recent) using 'brandTertiary' for active states. The main body is a FlatList of Customer Cards. FAB placed at bottom-right for manual add/import."
+    },
+    {
+      "name": "Customer Detail",
+      "purpose": "View the archived WhatsApp conversation, add private notes/tags, and set follow-ups.",
+      "states": {
+        "loading": "Spinner in the center",
+        "empty": "Empty state reading 'No messages archived yet' if customer is created manually without import.",
+        "error": "Readable text + Retry button"
+      },
+      "layout": "Collapsing glass header showing the Avatar and Customer Name. Two-tab segmented control: 'Archive' and 'Notes'. Archive tab displays a read-only list of message bubbles (Left/Customer in 'surfaceSecondary', Right/Business in 'brandTertiary'). Notes tab shows a structured view with a text area, tag chip group, and 'Set Follow-up' sticky button."
+    },
+    {
+      "name": "Pro Upgrade & Rescue Pack",
+      "purpose": "Upsell the pro tier while offering peace of mind via the Rescue Pack export.",
+      "states": {
+        "loading": "Spinner",
+        "empty": "N/A",
+        "error": "Error toast on failed export"
+      },
+      "layout": "Cinematic header using the 'premium dark textured' image with a dark gradient scrim, layered with a glassmorphism card detailing the Pro features. The 'Rescue Pack' section should feel highly secure and solid (surfaceSecondary card with a clear 'brandPrimary' export button)."
+    }
+  ],
+  "components": {
+    "customer_list_card": "flexDirection: 'row', alignItems: 'center', gap: 'md', padding: 'lg'. Avatar (36-40pt, fallback to initials if no logo). Center column (flex: 1) contains Name ('lg', weight 500) and Last Activity ('sm', 'muted'). Trailing column contains follow-up star icon or unread message badge (pill shape, 'brandTertiary'). Use 'surfaceSecondary' with 'md' radius for the card. No shadow.",
+    "chip_row": "flexDirection: 'row', flexWrap: 'wrap', gap: 'sm'. Chips use 'surfaceTertiary' background, 'pill' radius, and 'sm' padding horizontal. Active chips switch to 'brandTertiary'.",
+    "bottom_nav": "Material 3 inspired tall bar (~80pt). Background 'surface'. Active tab uses a pill-shaped indicator ('brandTertiary') behind the filled active icon. Inactive tabs use outlined icons.",
+    "message_bubble": "Radius 'lg'. Incoming (Customer) aligned left, 'surfaceSecondary' bg. Outgoing (Business) aligned right, 'brandTertiary' bg. Padding 'md'. Maximum width 80%.",
+    "fab": "Absolute positioned bottom-right above safe area. 56x56pt, 'lg' radius (squircle/rounded rect). Background 'brandPrimary', icon 'onBrandPrimary'."
+  },
+  "images": {
+    "onboarding_lock": {
+      "url": "https://images.unsplash.com/photo-1597331139982-e38ea8760c78?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjY2NzV8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMGxvY2slMjBzZWN1cml0eSUyMHNoaWVsZCUyMGdyZWVuJTIwdG9uZXxlbnwwfHx8fDE3OTEzOTM5MTl8MA&ixlib=rb-4.1.0&q=85",
+      "alt": "Abstract lock security on wood"
+    },
+    "empty_state_abstract": {
+      "url": "https://images.unsplash.com/photo-1713170861227-c1e960349eb3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NTYxOTF8MHwxfHNlYXJjaHwxfHxjYWxtJTIwYWJzdHJhY3QlMjBib3RhbmljYWwlMjBzaGFwZXMlMjBvbGl2ZSUyMGdyZWVufGVufDB8fHx8MTc5MTM5MzkxNHww&ixlib=rb-4.1.0&q=85",
+      "alt": "Calm abstract botanical shapes olive green"
+    },
+    "pro_hero_dark": {
+      "url": "https://images.unsplash.com/photo-1789261542424-905823f9edf3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NTN8MHwxfHNlYXJjaHwxfHxhYnN0cmFjdCUyMHByZW1pdW0lMjBkYXJrJTIwdGV4dHVyZWQlMjBiYWNrZ3JvdW5kfGVufDB8fHx8MTc5MTM5MzkxNHww&ixlib=rb-4.1.0&q=85",
+      "alt": "Abstract premium dark textured background water droplets"
+    },
+    "sample_customer_avatar": {
+      "url": "https://images.unsplash.com/photo-1651820707053-42afb9f920db?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDQ2NDF8MHwxfHNlYXJjaHwxfHxjb2ZmZWUlMjByb2FzdGVyJTIwc2hvcCUyMGxvZ28lMjBwbmd8ZW58MHx8fHwxNzkxMzkzOTE0fDA&ixlib=rb-4.1.0&q=85",
+      "alt": "Coffee roaster shop logo"
+    }
+  },
+  "haptics": {
+    "tab_press": "light",
+    "chip_toggle": "light",
+    "fab_press": "medium",
+    "export_rescue_pack": "success",
+    "set_followup": "success"
+  },
+  "instructions_to_main_agent": [
+    "Strictly follow the Material You (Utility Variant) personality. The app should feel highly professional, calm, and privacy-focused—never playful or childish.",
+    "Zero tolerance for blue, indigo, purple, or neon accents. Use the provided deep sage and slate color tokens.",
+    "No emojis allowed anywhere in the system UI.",
+    "Ensure the Onboarding screens and Pro Upgrade screens use the specified background images layered with the mandatory 3-stop vertical gradient scrim (transparent -> 20% surfaceInverse -> 70% surfaceInverse) to guarantee text readability.",
+    "Implement the Customer List as a stacked list of surfaceSecondary cards (no shadows). Follow the component specs closely for the layout (Avatar -> Name/Activity -> Trailing Status).",
+    "For the Customer Detail screen, build a segmented control or tab interface separating the Chat Archive (message bubbles) from the Notes/Tags view.",
+    "Always use the 'Plus Jakarta Sans' (Heading) and 'Geist' (Body) font pairings. Cap all font weights at 500.",
+    "Wire haptics directly on primary actions like FAB, chip toggles, and Rescue Pack exports as specified."
+  ]
+}

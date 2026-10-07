@@ -1,0 +1,57 @@
+{
+  "summary": "Frontend-only UI validation of the Memoraq Expo web preview. 21/27 UI checks passed, including Onboarding flow (Skip + Continue), Customers empty state, filter chips, Search tab, Follow Ups bucket chips, Settings screen, Pro screen with 'Unlock Memoraq Pro' flipping entitlement to a confirmed state, and Privacy screen with support email isahsileem@gmail.com. 3 real issues found, all stemming from the same root cause: on web preview expo-sqlite OPFS is unavailable and several screens/actions call the DB WITHOUT the withTimeout wrapper used elsewhere, so they hang forever instead of degrading to an empty/graceful state. Affected: Follow Ups tab stuck in 'Loading…' (never falls back to 'Nothing scheduled'), Settings → Load Sample Data silently hangs (no toast within 5s), Add Customer paste import stuck on 'Parsing transcript…' which blocks Customer detail testing on web. Also one false-negative on the first Pro-unlock assertion (success state 'You are on Memoraq Pro' did render — issue was only with the regex in my first test; verified in follow-up screenshot). No deprecated expo-* packages detected, no SafeAreaView misuse, no React Native red screen errors.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Follow Ups tab (app/(tabs)/followups.tsx)",
+        "issue": "`load()` awaits `listFollowUps(bucket)` directly without the `withTimeout` wrapper used in customers.tsx. On web preview (expo-sqlite OPFS unavailable) `items` stays `null` and screen is permanently stuck on 'Loading…', never showing the 'Nothing scheduled' empty state. Reference: /app/frontend/app/(tabs)/followups.tsx:28-36",
+        "testID": "followups-screen",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Settings → Load Sample Data (app/(tabs)/settings.tsx)",
+        "issue": "`onLoadSample` awaits `loadSampleData()` with no timeout. On web preview the call hangs; toast ('Loaded N sample customers' or 'Sample data already present or app not empty') never appears. User gets no feedback. Reference: /app/frontend/app/(tabs)/settings.tsx:62-66 and /app/frontend/src/platform/sample-data.ts",
+        "testID": "load-sample-data",
+        "priority": "HIGH"
+      },
+      {
+        "component": "Add Customer → Import pasted text (app/customer/add.tsx)",
+        "issue": "`importPasted` -> `runImport({kind:'text',...})` hangs indefinitely on web preview. Status remains 'Parsing transcript…' and `open-imported-customer` button never renders, blocking the full add-customer / customer-detail test path. Needs withTimeout / graceful web fallback inside the import pipeline. Reference: /app/frontend/app/customer/add.tsx:51-56 and /app/frontend/src/importer/import-pipeline.ts",
+        "testID": "import-pasted-button",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [
+      {
+        "flow": "Paste transcript → create customer → open detail",
+        "issue": "Cannot be verified on web preview because the paste-import step never resolves. All downstream testIDs (open-imported-customer, customer-detail-screen, detail-tab-*) are unreachable from the web preview. Needs either a web fallback in the import pipeline, or an in-memory DB shim for web.",
+        "affected_testIDs": ["import-pasted-button","open-imported-customer","customer-detail-screen","detail-tab-conversation","detail-tab-notes","detail-tab-attachments","detail-tab-activity"]
+      }
+    ],
+    "design_issues": [],
+    "react_native_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_1.json"],
+  "action_items": [
+    "Wrap `listFollowUps`/`getCustomer` loop in followups.tsx with the existing `withTimeout` helper (default to [] after ~1.5s) so Follow Ups falls back to the 'Nothing scheduled' empty state on web, matching customers.tsx behavior.",
+    "Wrap `loadSampleData()` in settings.tsx with a timeout (or make the function itself detect missing SQLite on web and return 0 quickly) so the toast always fires. Current UX silently hangs on web preview.",
+    "Harden the import pipeline (src/importer/import-pipeline.ts): detect when SQLite is unavailable on web and either (a) persist to a web/in-memory shim or (b) surface a clear 'Not supported on web preview' error so the paste/import flow stops hanging on 'Parsing transcript…'.",
+    "Consider surfacing a single app-wide 'Running without local storage (web preview)' banner so testers know why DB-backed features degrade."
+  ],
+  "critical_code_review_comments": [
+    "Inconsistent use of the withTimeout DB wrapper: customers.tsx uses it, but followups.tsx, settings.tsx (load sample), and the import pipeline do not. Centralize this.",
+    "Follow Ups screen initial state uses `null` to mean 'loading' with no error path — if the awaited call never resolves there is no way to recover. Add a `setItems([])` in a catch and in a timeout branch.",
+    "Settings → Load Sample Data provides no UI loading indicator while awaiting; combined with the hang this looks like a dead button on web."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (not in scope)", "frontend": "78% (21/27 UI checks passed; 3 real HIGH bugs, 3 downstream flows blocked)"},
+  "seed_data_creation": "None — Load Sample Data button never completed on web preview (see HIGH bug).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Preview URL: https://customer-memory-dev.preview.emergentagent.com. Set localStorage key 'memoraq.onboarded'='1' and reload to skip onboarding. Mobile viewport 390x844. All tested testIDs match /app/memory/test_credentials.md. On web preview, expo-sqlite OPFS is unavailable; screens that use the `withTimeout` helper degrade gracefully, screens that don't will hang on 'Loading…'. After fixes, re-verify: (1) Follow Ups shows 'Nothing scheduled' empty state within ~2s, (2) Settings → Load Sample Data produces a toast within ~2s, (3) Add Customer paste flow with sample '12/08/23, 10:30 AM - Rahul: Hi\\n12/08/23, 10:31 AM - You: Hello' surfaces open-imported-customer, which then opens customer-detail-screen with tabs conversation/notes/attachments/activity.",
+  "rca_of_issue": "Root cause for all three HIGH bugs is identical: expo-sqlite's OPFS web backend is not available in the Emergent web preview, so any `await` against the DB layer never resolves. The app partially handles this via `withTimeout(call, 1500, fallback)` in src/db/schema.ts and uses it correctly in app/(tabs)/customers.tsx. However, Follow Ups, Load Sample Data, and the paste-import pipeline call DB functions directly. Reproduction: open the preview URL on web, set `memoraq.onboarded='1'`, reload. Follow Ups tab stays on 'Loading…' indefinitely; Settings → Load Sample Data shows no toast; Add Customer with any pasted text stays on 'Parsing transcript…'. Mitigation: wrap the DB-dependent awaits in `withTimeout` with sensible fallbacks (empty array / 0 / clear error), or detect `Platform.OS === 'web'` + missing OPFS once in src/db/schema.ts and short-circuit all repo calls with the empty results instead of hanging."
+}

@@ -1,0 +1,73 @@
+{
+  "expo": {
+    "name": "Memoraq",
+    "slug": "memoraq",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "memoraq",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.blackbox",
+      "infoPlist": {
+        "NSUserNotificationsUsageDescription": "Remind you about customer follow-ups"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "backgroundColor": "#365341"
+      },
+      "package": "com.blackbox",
+      "permissions": ["POST_NOTIFICATIONS", "SCHEDULE_EXACT_ALARM"],
+      "intentFilters": [
+        {
+          "action": "SEND",
+          "category": ["DEFAULT"],
+          "data": [
+            { "mimeType": "text/plain" },
+            { "mimeType": "application/zip" }
+          ]
+        },
+        {
+          "action": "SEND_MULTIPLE",
+          "category": ["DEFAULT"],
+          "data": [{ "mimeType": "*/*" }]
+        }
+      ]
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "single",
+      "favicon": "./assets/images/favicon.png"
+    },
+    "plugins": [
+      "expo-router",
+      [
+        "expo-splash-screen",
+        {
+          "image": "./assets/images/splash-image.png",
+          "imageWidth": 200,
+          "resizeMode": "contain",
+          "backgroundColor": "#365341"
+        }
+      ],
+      "expo-font",
+      "expo-image",
+      "expo-secure-store",
+      "expo-web-browser",
+      "expo-status-bar",
+      "expo-sqlite",
+      "expo-sharing",
+      "@react-native-vector-icons/feather",
+      [
+        "expo-notifications",
+        { "icon": "./assets/images/icon.png", "color": "#365341" }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": false
+    }
+  }
+}
